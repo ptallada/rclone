@@ -401,7 +401,7 @@ func TestUploadRedirectRetriesLocalCopy(t *testing.T) {
 						// Read without sending 100 Continue, so the client must hit its expect timeout.
 						conn, rw, err := w.(http.Hijacker).Hijack()
 						require.NoError(t, err)
-						defer conn.Close()
+						defer func() { assert.NoError(t, conn.Close()) }()
 						_, err = io.CopyN(io.Discard, rw, r.ContentLength)
 						require.NoError(t, err)
 						_, err = fmt.Fprintf(rw, "HTTP/1.1 307 Temporary Redirect\r\nLocation: %s\r\nContent-Length: 0\r\nConnection: close\r\n\r\n", pool.URL)
